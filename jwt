@@ -1,0 +1,3 @@
+import pyjwt
+token = jwt.encode({'scope': 'app'}, SECRET, algorithm='HS256', headers={'kid':ID})
+print("the jwt token is:", token)
