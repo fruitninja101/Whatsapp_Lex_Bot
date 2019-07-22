@@ -1,0 +1,40 @@
+import os
+import glob
+import time
+import json
+from botocore.vendored import requests
+#set the global API request parameters:
+jwt = 'JWT TOKEN GOES  HERE'
+
+def lambda_handler(event, context): #RECEIVE WHATSAPP WEBHOOK FROM SMOOCH
+    print("Received event from  Smooch : " + json.dumps(event))
+    data = event #pass the JSON formatted objects into the variable called data
+    for item in data['messages']:
+        message=item['text'] #find the key within 'messages' called 'text' and print the value        
+        print("This is the message from whatsapp:", message)
+                
+        parameters = {
+        'type':'text',
+        'text':'Hello there',
+        'role':'appMaker'
+        }
+        payload = json.dumps(parameters)
+        bearer_token = 'Bearer ' + jwt
+        header = {
+        'Content-Type': 'application/json',
+        'Authorization': bearer_token
+        }
+        url = 'https://api.smooch.io/v1.1/apps/5d0caf9461f0220010d1a437/appusers/8d425cf2ba616b89cfd5c361/messages'
+        r = requests.post(url, data=payload, headers=header) #auth token sent as part of header
+        
+        if  r.status_code != 201:
+                data = r.json()
+                print("", data)
+
+        else:  #if the object assignment is successful then show the message details
+                data = r.json()
+                print("", data)
+        return {
+        'statusCode': 200,
+        'body': json.dumps('Hello from Lambda!')
+        }
