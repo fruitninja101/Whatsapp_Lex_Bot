@@ -24,7 +24,7 @@ def lambda_handler(event, context): #RECEIVE WHATSAPP WEBHOOK FROM SMOOCH
         'Content-Type': 'application/json',
         'Authorization': bearer_token
         }
-        url = 'https://api.smooch.io/v1.1/apps/5d0caf9461f0220010d1a437/appusers/8d425cf2ba616b89cfd5c361/messages'
+        url = 'https://api.smooch.io/v1.1/apps/<APPID>/appusers/<USERID>/messages'
         r = requests.post(url, data=payload, headers=header) #auth token sent as part of header
         
         if  r.status_code != 201:
