@@ -1,0 +1,50 @@
+import os
+import glob
+import time
+import json
+from botocore.vendored import requests
+import datetime
+
+user = 'iot@zendesk.test' + '/token'
+api_token = 'wnJl6XISFDaybV7ER0o6lTnWaXcad6deFoulwiyP'
+headers = {'content-type': 'application/json'}
+
+def lambda_handler(event, context):
+    print("Received event: " + json.dumps(event))
+    data = event #pass the JSON formatted objects into the variable called data
+    
+    CaseNotes = data['currentIntent']['slots']['CaseNotes']
+    emailAddress =  data['currentIntent']['slots']['email']
+    #print('Slot data is:' + json.dumps(SlotData))
+    
+    url= 'https://z3ndem.zendesk.com/api/v2/users/search.json?query=' + emailAddress
+    #print('the URL is: ' + url)
+    r = requests.get(url, auth=(user, api_token), headers=headers)
+    if r.status_code != 200:
+            error_msg = 'Failed to get data with error {}'.format(r.status_code)
+    else:
+        data = r.json()
+        print('response  to get is:  ' + json.dumps(data))
+    for item in data['users']:
+        requesterID=item['id'] #find the array within 'users' called 'id'        
+        print("The User  ID is :", requesterID)
+    
+    subject = '📲 New Issue reported from Whatsapp'
+    body = CaseNotes
+    requester = requesterID #this is the Zendesk user ID
+    # Package the data in a dictionary matching the expected JSON
+    data = {'ticket': {'requester_id':requester,'subject': subject, 'comment': {'body': body}}}
+
+    # Encode the data to create a JSON payload
+    payload = json.dumps(data)
+    # Set the request parameters
+    url = 'https://z3ndem.zendesk.com/api/v2/tickets.json'
+    # Do the HTTP post request
+    response = requests.post(url, data=payload, auth=(user, api_token), headers=headers)
+
+# Report success
+    #print('Successfully logged the Sunshine Event')
+    return {
+        'statusCode': 200,
+        'body': json.dumps('Hello from Lambda!')
+    }
